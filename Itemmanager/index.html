@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Itemmanager</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+          <div class="navbar-header">
+              <a class="navbar-brand" href="#">Item Manger</a>
+          </div>
+          
+          <div class="collapse navbar-collapse" id="navbar">
+            <ul class="nav navbar-nav">
+              <li>
+                <a class="nav-link " aria-current="page" href="/">Home</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    <div class="container">
+        <div class="p-5">
+            <h1>Add Items</h1>
+            <form id="itemform">
+                <div class="form-group">
+                    <label>Text</label>
+                    <input type="text" name="text" id="text" placeholder="Text" class="form-control">
+                </div>
+                <div class="form-group  pb-5">
+                    <label>Body</label>
+                    <textarea name="body" id="body" placeholder="Body" class="form-control"></textarea>
+                </div>
+                <input type="submit" value="Submit" class="btn btn-dark btn-lg">
+            </form>
+            <hr>
+
+            <ul id="items" class="list-group"></ul>
+        </div>
+       
+    </div>
+    
+    <script
+    src="https://code.jquery.com/jquery-1.12.4.js"
+    integrity="sha256-Qw82+bXyGq6MydymqBxNPYTaUXXq7c8v3CwiYwLLNXU="
+    crossorigin="anonymous"></script>  
+    <script> type="text/javascript"
+     $(document).ready(function(){
+         let i=1;
+       getItems();
+       
+      //insert event
+       $('#itemform').on('submit',function(e){
+            
+           e.preventDefault();
+
+           let text=$('#text').val();
+           let body=$('#body').val();
+           addItems(text,body);
+
+       });
+         //Insert item using api
+         function addItems(text,body){
+            $.ajax({
+                method:'POST',
+                url:'http://127.0.0.1:8000/api/items',
+                data:{
+                    text:text,
+                    body:body
+                }
+            }).done(function(item){
+                alert('Item #'+item.id+' added');
+                location.reload();
+            });
+        }
+        
+        //delete event
+        $('body').on('click','.deleteLink',function(e){
+
+            e.preventDefault();
+            let id=$(this).data('id');
+            deleteItems(id);
+
+        });
+        //delete using api
+        function deleteItems(id){
+           
+            $.ajax({
+                method:'POST',
+                url:'http://127.0.0.1:8000/api/items/'+id,
+                data:{
+                    _method:'DELETE'
+                }
+            }).done(function(item){
+                alert('Item Removed');
+                location.reload();
+            });
+        } 
+         /*update event
+         $('body').on('click','.updateLink',function(e){
+
+            e.preventDefault();
+            i=0;
+            let id=$(this).data('id');
+            $('#itemform').on('submit',function(e){
+
+            let text=$('#text').val();
+            let body=$('#body').val();
+            updateItems(id,text,body);
+
+});
+}); 
+        //update using api
+        function updateItems(id,text,body){
+           
+           $.ajax({
+               method:'POST',
+               url:'http://127.0.0.1:8000/api/items/'+id,
+               data:{
+                text:text,
+                    body:body,
+                   _method:'PUT'
+               }
+           }).done(function(item){
+            alert('Item #'+item.id+' updated'); 
+              location.reload();
+           });
+       }*/
+       //<a href="#" class="updateLink" data-id="${item.id}">Edit</a>
+       //get items from PI
+        function getItems(){
+            $.ajax({
+                url:'http://127.0.0.1:8000/api/items'
+            }).done(function(items){
+               let output='';
+               $.each(items,function(key,item){
+                output+=`
+                <li class="list-group-item">
+                  <strong>${item.text}: </strong>${item.body}
+                  <a href="#" class="deleteLink" data-id="${item.id}">Delete</a>
+                  
+                </li>
+
+                `;
+               });
+               $('#items').append(output);
+            });
+        }
+     });
+
+    </script> 
+</body>
+</html>
